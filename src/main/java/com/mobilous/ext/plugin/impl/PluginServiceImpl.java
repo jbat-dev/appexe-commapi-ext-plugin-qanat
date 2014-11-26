@@ -3,9 +3,7 @@ package com.mobilous.ext.plugin.impl;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -13,7 +11,6 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -25,7 +22,6 @@ import org.glassfish.jersey.jackson.JacksonFeature;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
-import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -54,11 +50,17 @@ public class PluginServiceImpl implements PluginService {
 	private static String username;
 	private static String password;
 	private static String authtype;
+	@SuppressWarnings("unused")
 	private static String callbackURL;
 	private static String domain;
 	private static String port;
 	private static String pluginFile;
 	private static String pluginConfigFile;
+	private final String tableList = "qanapptablelist";
+	private final String columnData = "qanapprecordinfo";
+	private final String recodeNum = "qanapprecordcount";
+	private final String dataValue = "qanapprecordvalue";
+
 
 	public PluginServiceImpl() {
 
@@ -92,7 +94,7 @@ public class PluginServiceImpl implements PluginService {
 
 	}
 
-	// TODO Check XMLfile to upload, and
+	
 	/**
 	 * loadSettingsFromConfigfile - the plugin will load the settings from the
 	 * config file.
@@ -173,7 +175,7 @@ public class PluginServiceImpl implements PluginService {
 	 */
 	@Override
 	public HeterogeneousMap getServiceName() {
-
+//TODO
 		HeterogeneousMap map = new HeterogeneousMap();
 		map.put(DatasetKey.SERVICENAME.getKey(), serviceName);
 
@@ -182,8 +184,9 @@ public class PluginServiceImpl implements PluginService {
 		// plugin is connecting.
 
 		/*
-		 * JBAT hosoi QanatPlugin use only username and id. for twitterPlugin
-		 * that is using consumer_key, consumer_secret and so on. API said that
+		 * JBAT hosoi
+		 * QanatPlugin use only username and id !
+		 * Twitter is using consumer_key, consumer_secret and so on. API said that
 		 * set callbackURL for "DatasetKey.AUTHORIZE_URL.getKey()".
 		 * 
 		 * Under code is jbat original code by Mr.Tanaka.
@@ -254,15 +257,10 @@ public class PluginServiceImpl implements PluginService {
 			// includes in configulation file.
 			// retVal.put("authorize_url", null);
 			// retVal.put("user_connection", "DummyGrant");
-			username = dataset.get("username");
-			password = dataset.get("password");
+//			username = dataset.get("username");
+//			password = dataset.get("password");
 			System.out.println("PLUGIN : Authenticate " + serviceName
 					+ " using custom with " + username + " / " + password);
-
-			/*
-			 * TODO JBAT hosoi Check how to tell the username and password to
-			 * Qanat
-			 */
 
 			retVal.put("security", authtype);
 			retVal.put("auth_type", authtype);
@@ -282,19 +280,31 @@ public class PluginServiceImpl implements PluginService {
 	public HeterogeneousMap getSchema(HeterogeneousMap dataset) {
 		HeterogeneousMap schema = new HeterogeneousMap();
 		// getSchema request for the list of tables
-
-		/*
-		 * JBAT hosoi get schema and tables information with REST Architecture.
-		 */
 		try {
 			String tablename = dataset.get(DatasetKey.TABLE.getKey());
 			List<String> tables = new ArrayList<String>();
+			
 			if (tablename == null || StringUtils.isBlank(tablename)) {
 				System.out.println(">>>>>>>>>>>>>>>>>>Table begin added");
-
-				// TODO REST Architecture to get tables at here
+//TODO
+				JSONObject jobj = requestToQanat(dataset, this.tableList);
+				
+				if(jobj == null){
+					System.out.println("[QanatPlugin] requestError Occurred");
+					schema.put("auth_status", "reject");
+					return schema;
+				}
+				
+				JSONArray data_a = (JSONArray)jobj.get("data");
+								
+				for(Integer i = 0; i < data_a.size(); i++){
+					JSONObject tableData = (JSONObject)data_a.get(i);
+					String  tableName= (String)tableData.get(i.toString());
+					tables.add(tableName);
+				}
 
 				schema.put(DatasetKey.SCHEMA.getKey(), tables, List.class);
+				
 			} else {
 				System.out.println(">>>>>>>>>>>>>>>>>>Fields begin added :"
 						+ tablename);
@@ -303,9 +313,43 @@ public class PluginServiceImpl implements PluginService {
 				List<String> realFields = new ArrayList<String>();
 				List<String> dateFields = new ArrayList<String>();
 				List<String> boleanFields = new ArrayList<String>();
-
-				// TODO REST Architecture to get Field name by table name at
-				// here
+//TODO
+				JSONObject jobj = requestToQanat(dataset, this.columnData);
+				
+				if(jobj == null){
+					System.out.println("[QanatPlugin] requestError Occurred");
+					schema.put("auth_status", "reject");
+					return schema;
+				}
+				
+				JSONArray data_a = (JSONArray)jobj.get("data");
+				JSONObject data_o = (JSONObject)data_a.get(0);
+				JSONArray field_a = (JSONArray)data_o.get(tablename);
+				
+				for(int i = 0; i < field_a.size(); i++){
+					JSONObject fieldData = (JSONObject)field_a.get(i);
+					String fieldType = (String)fieldData.get("Type");
+					String fieldName = (String)fieldData.get("Name");
+					switch(fieldType){
+					case "TEXT":
+						textFields.add(fieldName);
+						break;
+					case "INT":
+						integerFields.add(fieldName);
+						break;
+					case "REAL":
+						realFields.add(fieldName);
+						break;
+					case "DATE":
+						dateFields.add(fieldName);
+						break;
+					case "BOOL":
+						dateFields.add(fieldName);
+						break;
+					default :
+						System.out.println("Strange Type");
+					}
+				}
 
 				if (textFields.size() > 0) {
 					schema.put(DataType.TEXT.getValue(), textFields, List.class);
@@ -326,7 +370,6 @@ public class PluginServiceImpl implements PluginService {
 				}
 			}
 		} catch (Exception e) {
-			/* TODO errors handle */
 			e.getStackTrace();
 			schema.put("auth_status", "invalid");
 			return schema;
@@ -386,7 +429,6 @@ public class PluginServiceImpl implements PluginService {
 		 */
 	}
 
-	// TODO
 	/**
 	 * numrecord() - Plugin implementation of get the number of records that the
 	 * query will return
@@ -394,13 +436,12 @@ public class PluginServiceImpl implements PluginService {
 	 * @param dataset
 	 *            contains the tablename and where condition.
 	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public HeterogeneousMap numrecord(HeterogeneousMap dataset) {
 
 		HeterogeneousMap map = new HeterogeneousMap();
 
-		/*  */
+		// TODO
 		System.out.println("PLUGIN numrecord is called");
 
 		String where = dataset.get(DatasetKey.WHERE.getKey());
@@ -410,23 +451,25 @@ public class PluginServiceImpl implements PluginService {
 			System.out.println("SELECT COUNT() from " + tablename + " where "
 					+ where);
 			if (where != null) {
-				// FIXME : Query actual query
-				String retStr = requestToQanatDummy("numrecord");
+//				String retStr = requestToQanatDummy("numrecord");
 			} else {
-				// FIXME : Query actual query
-				String retStr = requestToQanatDummy("numrecord");
+//				String retStr = requestToQanatDummy("numrecord");
 			}
 
-			// FIXME : replace this with the actual number of records result.
+			JSONObject jobj = requestToQanat(dataset, this.recodeNum);
+			
+			if(jobj == null){
+				System.out.println("[QanatPlugin] requestError Occurred");
+				map.put("servicename", serviceName);
+				map.put("auth_status", "reject");
+				return map;
+			}
+			
+			JSONArray data_a = (JSONArray)jobj.get("data");
+			JSONObject numobj = (JSONObject)data_a.get(0);
+			String recodenum = (String)numobj.get(tablename);
 
-			System.out.println(">>>>>>>>>>>>>>>>>>Fields begin added :"
-					+ tablename);
-			int recodenum = 0;
-
-			// TODO get number of recodes here
-
-			map.put(DatasetKey.NUMBEROFRECORD.getKey(),
-					new Integer(recodenum).toString());
+			map.put(DatasetKey.NUMBEROFRECORD.getKey(), recodenum);
 
 			/*
 			 * if (tablename.equals("TestTable")) {
@@ -492,7 +535,7 @@ public class PluginServiceImpl implements PluginService {
 		String values = createCommaSeparatedStringFromJson(setJson, 1);
 
 		try {
-			// TODO : Query actual query
+			// 
 			System.out.println("PLUGIN INSERT INTO " + tablename + " "
 					+ columnnames + " VALUES " + values);
 			String retStr = requestToQanatDummy("create");
@@ -531,7 +574,6 @@ public class PluginServiceImpl implements PluginService {
 
 	}
 
-	// TODO
 	/**
 	 * read() - Plugin implementation of select
 	 * 
@@ -557,19 +599,23 @@ public class PluginServiceImpl implements PluginService {
 		try {
 			System.out.println("PLUGIN Select * from " + tablename + "where "
 					+ where);
-
-			if (where != null) {
-				// FIXME : Query actual query
-			} else {
-				// FIXME : Query actual query
-			}
-
-			// FIXME return Result JSON data
+			// in Qanat "where" was not used. 
+			//TODO 
 			System.out.println(">>>>>>>>>>>>>>>>>>Fields begin added :"
 					+ tablename);
-
-//			JSONArray jsonarray = requestToQanatWithRest(dataset, tablename);
-	//		map.put(DatasetKey.DATA.getKey(), jsonarray, JSONArray.class);
+			
+			JSONObject jobj = requestToQanat(dataset, this.dataValue);
+			if(jobj == null){
+				System.out.println("[QanatPlugin] requestError Occurred");
+				map.put("servicename", serviceName);
+				map.put("auth_status", "reject");
+				return map;
+			}
+			
+			JSONArray data_a = (JSONArray)jobj.get("data");
+			JSONObject data_o = (JSONObject)data_a.get(0);
+			JSONArray result = (JSONArray)data_o.get(tablename);
+		
 
 			/*
 			 * if (tablename.equals("TestTable")) {
@@ -591,6 +637,8 @@ public class PluginServiceImpl implements PluginService {
 			 * } else { throw new Exception("invalid table name: " + tablename);
 			 * }
 			 */
+			map.put(DatasetKey.DATA.getKey(), result, JSONArray.class);
+
 			map.put("servicename", serviceName);
 			map.put("auth_status", "valid");
 
@@ -640,12 +688,12 @@ public class PluginServiceImpl implements PluginService {
 		try {
 			// QueryResult aggregate;
 			if (where != null) {
-				// TODO : Query actual query
+
 				System.out.println("PLUGIN UPDATE " + tablename + " SET "
 						+ setquery + " where " + where);
 				String retStr = requestToQanatDummy("update");
 			} else {
-				// TODO : Query actual query
+
 				System.out.println("PLUGIN UPDATE " + tablename + " SET "
 						+ setquery);
 				String retStr = requestToQanatDummy("update");
@@ -669,9 +717,9 @@ public class PluginServiceImpl implements PluginService {
 			// }
 			// return the updated records to the comserver.
 
-			// TODO : for training purpose only
-			map.put(DatasetKey.DATA.getKey(), createDummyResult(),
-					JSONArray.class);
+			// for training purpose only
+//			map.put(DatasetKey.DATA.getKey(), createDummyResult(),
+//					JSONArray.class);
 
 		} catch (Exception e) {
 			map.put("servicename", serviceName);
@@ -706,14 +754,14 @@ public class PluginServiceImpl implements PluginService {
 			if (where != null) {
 				System.out.println("PLUGIN DELETE FROM " + tablename
 						+ " where " + where);
-				// TODO : Query actual query
+
 				String retStr = requestToQanatDummy("delete");
 			} else {
 				// basically we shouldnt allow delete request without where
 				// condition.
 				// for this purpose we allow that one.
 				System.out.println("PLUGIN DELETE FROM " + tablename);
-				// TODO : Query actual query
+
 				String retStr = requestToQanatDummy("delete");
 			}
 
@@ -761,6 +809,7 @@ public class PluginServiceImpl implements PluginService {
 	 * @return
 	 * @throws ParseException
 	 */
+	@SuppressWarnings("unused")
 	private TableData requestToQanatWithRest(HeterogeneousMap dataset,
 			String qanatServiceName) throws ParseException {
 
@@ -770,7 +819,7 @@ public class PluginServiceImpl implements PluginService {
 
 		String qanatDomain = "http://" + consumerKey + ":" + port + "/qanat";
 
-		// TODO set bean 
+		// set bean 
 		TableData tableData = new TableData();
 		TableData tableDataPersisted = client
 				.target("http://" + consumerKey + ":6200/qanat") // qanat
@@ -787,71 +836,84 @@ public class PluginServiceImpl implements PluginService {
 
 		return data;
 	}
-	
 
 	/**
-	 * ugokebaeenen
-	 * 
+	 * ugokeba eenenn
 	 * @param dataset
 	 * @param qanatServiceName
 	 * @return
 	 * @throws ParseException
 	 */
 	private JSONObject requestToQanat(HeterogeneousMap dataset,
-			String qanatServiceName) throws ParseException {
+			String qanatServiceName) {
 
-		Client client = ClientBuilder.newBuilder().newClient();
-		WebTarget target = client.target(consumerKey + ":" + port + "/qanat/rest");// "http://10.60.57.118/appexe"
-		target = target.path(qanatServiceName);
+		Client client = ClientBuilder.newClient()
+				.register(JacksonFeature.class);
+		WebTarget target = client.target("http://" + domain + ":" + port + "/qana/rest");
+		target = target.path(serviceName);
 
 //		  if you sent parameter at URL. set queryParams.  
 //		 	    .queryParam("service", qanatServiceName)
 //				.queryParam("params[args0]", username)
 //				.queryParam("params[args1]", password);
-
+		
 		Invocation.Builder builder = target.request();
-//		Response response = builder.get();
-		String jstr = makeJsonObject(qanatServiceName);
-//		Response response = builder.post(Entity.json(jstr));
-		
-		String resStr = builder.post(Entity.json(JSONObject.class), String.class);
-		
-		JSONObject jsonobj = new JSONObject();
-		try {
-			jsonobj = (JSONObject) (new JSONParser().parse(resStr));
-		} catch (ClassCastException e) {
-			// getting a not-Json expression string, for example "Error".
-			System.err.println("JSONParser.parse : " + resStr);
-			throw e;
-		} catch (ParseException e) {
-			throw e;
+		JSONObject reqjobj = makeJsonObject(serviceName, "APPTEST");
+		if(reqjobj == null){
+			System.out.println("[QanatPlugin] makeJason Error");
+			return null;
 		}
-		return jsonobj;
+		String resStr;
+		try{
+			resStr = builder.post(Entity.entity(reqjobj,MediaType.APPLICATION_JSON), String.class);
+		}catch (Exception e){
+			System.out.println("[QanatPlugin] transport error");
+			System.out.println(e.getStackTrace());
+			return null;
+		}
+
+		Object obj = JSONValue.parse(resStr);
+		JSONObject resjobj = (JSONObject)obj;
+		
+		return resjobj;
 	}
 	
-	private String makeJsonObject(final String serviceName){
-		Map<String, Object> obj = new LinkedHashMap<String, Object>();
-
-		if(serviceName.equalsIgnoreCase("qanatapptablelist")){
-			obj.put("user", username);
-			obj.put("pass", password);
-			obj.put("utype", 0);
+	@SuppressWarnings("unchecked")
+	private JSONObject makeJsonObject(final String serviceName, final String tablename){
+		JSONObject reqjson = new JSONObject();
+		reqjson.put("user", "cvadmin");
+		reqjson.put("pass", "cvadmin");
+		if(serviceName.equals("qanapptablelist")){
+			reqjson.put("utype", "310");
+		} else if(serviceName.equals("qanapprecordinfo")){
+			reqjson.put("tablename", tablename);
+			reqjson.put("utype", "310");
+		} else if(serviceName.equals("qanapprecordcount")){
+			reqjson.put("tablename", tablename);
+			reqjson.put("utype", "310");
+		} else if(serviceName.equals("qanapprecordvalue")){
+			reqjson.put("tablename", tablename);
+			reqjson.put("utype", "310");
+		} else {
+			System.out.println("undefined servicename");
+			return null;
 		}
-		
-		String jsonText = JSONValue.toJSONString(obj);
-		return jsonText;
+		JSONArray jarray = new JSONArray();
+		jarray.add(reqjson);
+
+		JSONObject jobjData = new JSONObject();
+		jobjData.put("data", jarray);
+		return jobjData;
 	}
 
 	public String requestToQanatDummy(String qanatServiceName)
 			throws ParseException {
 
-		Client client = ClientBuilder.newBuilder().newClient();
+		Client client = ClientBuilder.newClient();
 		WebTarget target = client.target(domain + "/appexe");
 		target = target.path("WebService")
 				.queryParam("dummy", qanatServiceName);
 		Invocation.Builder builder = target.request();
-		Response response = builder.get();
-		String jsonStr = builder.get(String.class);
 
 		return builder.get(String.class);
 

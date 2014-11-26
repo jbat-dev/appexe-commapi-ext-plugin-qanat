@@ -21,6 +21,10 @@ public enum DatasetKey {
 	TABLE("table"),
 	USER_CONNECTION("user_connection"),
 	WHERE("where"),
+    FIELDS("fields"),   // add JBAT
+    ORDER("order"),   // add JBAT
+    LIMIT("limit"),   // add JBAT
+    OFFSET("offset"),   // add JBAT
 	NUMBEROFRECORD("numrec");
 	
 	private String key;
