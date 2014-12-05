@@ -14,6 +14,9 @@ import javax.ws.rs.core.MediaType;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import jp.co.jbat.qanat.rest.entity.Request;
+import jp.co.jbat.qanat.rest.entity.RequestorMember;
+import jp.co.jbat.qanat.rest.entity.Response;
 import net.xeoh.plugins.base.annotations.Capabilities;
 import net.xeoh.plugins.base.annotations.PluginImplementation;
 
@@ -29,9 +32,6 @@ import org.w3c.dom.NodeList;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jbat.http.rest.entity.Request;
-import com.jbat.http.rest.entity.RequestorMember;
-import com.jbat.http.rest.entity.Response;
 import com.mobilous.ext.plugin.PluginService;
 import com.mobilous.ext.plugin.constant.Constant;
 import com.mobilous.ext.plugin.constant.DatasetKey;
@@ -55,16 +55,17 @@ public class PluginServiceImpl implements PluginService {
 	@SuppressWarnings("unused")
 	private static String callbackURL;
 	private static String domain;
-	private static String port;
+	private static String port;  // Using consumerSecret
 	private static String pluginFile;
 	private static String pluginConfigFile;
 	
 	// for qanat
 	private static String userType = "310";
-	private final String tableList = "qanapptablelist";
-	private final String columnData = "qanapprecordinfo";
-	private final String recodeNum = "qanapprecordcount";
-	private final String dataValue = "qanapprecordvalue";
+	// TODO make Property DATA
+	private static final String TABLELIST = "qanapptablelist";
+	private static final String COLUMNDATA = "qanapprecordinfo";
+	private static final String RECODENUM = "qanapprecordcount";
+	private static final String DATAVALUE = "qanapprecordvalue";
 
 
 	public PluginServiceImpl() {
@@ -72,24 +73,20 @@ public class PluginServiceImpl implements PluginService {
 		// default values
 		serviceName = "Qanat";
 
-		// Qanat Domain
-		consumerKey = "10.60.46.241";
-		port = "6200";
-		
-		username = "cvadmin";
-		password = "cvadmin";
-		authtype = "custom";
-		// FIXED domain means AppExe domain
-		domain = "syajims01.mobilous.com";
-
+// TODO DELETE FOR TEST
+// Qanat Domain
+consumerKey = "10.60.46.241";
+port = "6200";
+username = "cvadmin";
+password = "cvadmin";
+authtype = "custom";
+domain = "syajims01.mobilous.com";
 
 		// Do not change
 		callbackURL = "https://" + domain
 				+ ":8181/commapi/extsvc/authenticate?servicename="
 				+ serviceName;
 
-		// update the plugin filename, if the plugin filename will be changed
-		// update this
 		pluginFile = "appexe-commapi-ext-plugin-qanat.jar";
 
 		// update the plugin config filename should be same with plugin filename
@@ -139,33 +136,37 @@ public class PluginServiceImpl implements PluginService {
 				Node nNode = nList.item(temp);
 				if (nNode.getNodeType() == Node.ELEMENT_NODE) {
 					Element eElement = (Element) nNode;
+
 					serviceName = eElement.getElementsByTagName("servicename")
 							.item(0).getTextContent();
+					System.out.println("servicename : "
+							+ serviceName);
+					
 					consumerKey = eElement.getElementsByTagName("consumerkey")
 							.item(0).getTextContent();
+					System.out.println("consumerKey : "
+							+ consumerKey);
+					
+					// !! cousumerSecret is Qanat port number. !!
+					port = eElement.getElementsByTagName("consumerSecret")
+							.item(0).getTextContent();
+					System.out.println("(port)consumerSecret : "
+							+ port);
+					
 					domain = eElement.getElementsByTagName("domain").item(0)
 							.getTextContent();
-
+					System.out.println("domain : "
+							+ domain);
+					
 					username = eElement.getElementsByTagName("username")
 							.item(0).getTextContent();
+					System.out.println("username : "
+							+ username);
+					
 					password = eElement.getElementsByTagName("password")
 							.item(0).getTextContent();
-
-					System.out.println("servicename : "
-							+ eElement.getElementsByTagName("servicename")
-									.item(0).getTextContent());
-					System.out.println("consumerKey : "
-							+ eElement.getElementsByTagName("consumerkey")
-									.item(0).getTextContent());
-					System.out.println("domain : "
-							+ eElement.getElementsByTagName("domain").item(0)
-									.getTextContent());
-					System.out.println("username : "
-							+ eElement.getElementsByTagName("username").item(0)
-									.getTextContent());
 					System.out.println("password : "
-							+ eElement.getElementsByTagName("password").item(0)
-									.getTextContent());
+							+ password);
 				}
 			}
 		} catch (Exception e) {
@@ -191,19 +192,6 @@ public class PluginServiceImpl implements PluginService {
 		// Supply the authorization login URL on for this plugin.
 		// plugin console will use the URL to to login on the service that this
 		// plugin is connecting.
-
-		/*
-		 * JBAT hosoi
-		 * QanatPlugin use only username and id !
-		 * Twitter is using consumer_key, consumer_secret and so on. API said that
-		 * set callbackURL for "DatasetKey.AUTHORIZE_URL.getKey()".
-		 * 
-		 * Under code is jbat original code by Mr.Tanaka.
-		 * map.put(DatasetKey.AUTHORIZE_URL.getKey(),
-		 * "http://console.mobilous.com/en/database-manager/"
-		 * +serviceName+"?sid=jbat");
-		 */
-
 		// map.put(DatasetKey.AUTHORIZE_URL.getKey(), callbackURL);
 
 		map.put("use_api", true, Boolean.class);
@@ -227,6 +215,7 @@ public class PluginServiceImpl implements PluginService {
 			// code to access grant.
 
 			if (dataset.get("code") == null) {
+				
 				// If the authenticate request does not contain authorization
 				// code, this plugin returns the login URL for the device to
 				// login and receive the authorization code.
@@ -257,19 +246,12 @@ public class PluginServiceImpl implements PluginService {
 				 * AccessGrant.class);
 				 */
 
-				retVal.put("auth_type", "OAuth2");
+				retVal.put(DatasetKey.AUTH_TYPE.getKey(), "OAuth2");
 				retVal.put("user_connection", "OAUTH access grant");
 			}
 		} else {
 
-			// do nothing because we directory connect with id/password, which
-			// includes in configulation file.
-			// retVal.put("authorize_url", null);
-			// retVal.put("user_connection", "DummyGrant");
-//			username = dataset.get("username");
-//			password = dataset.get("password");
-			System.out.println("PLUGIN : Authenticate " + serviceName
-					+ " using custom with " + username + " / " + password);
+			// do nothing because we directory connect with id/password.
 
 			retVal.put("security", authtype);
 			retVal.put("auth_type", authtype);
@@ -295,7 +277,7 @@ public class PluginServiceImpl implements PluginService {
 			
 			if (tablename == null || StringUtils.isBlank(tablename)) {
 				System.out.println(">>>>>>>>>>>>>>>>>>Table begin added");
-				JSONArray data_a = requestToQanat(this.tableList, tablename);
+				JSONArray data_a = requestToQanat(TABLELIST, tablename);
 				
 				if(data_a.isEmpty()){
 					System.out.println("[QanatPlugin] request Error No Table");
@@ -321,7 +303,8 @@ public class PluginServiceImpl implements PluginService {
 				List<String> realFields = new ArrayList<String>();
 				List<String> dateFields = new ArrayList<String>();
 				List<String> booleanFields = new ArrayList<String>();
-				JSONArray data_a = requestToQanat(this.columnData, tablename);
+			
+				JSONArray data_a = requestToQanat(COLUMNDATA, tablename);
 				
 				if(data_a.isEmpty()){
 					System.out.println("[QanatPlugin] requestError ");
@@ -415,7 +398,7 @@ public class PluginServiceImpl implements PluginService {
 //				String retStr = requestToQanatDummy("numrecord");
 			}
 
-			JSONArray data_a = requestToQanat(this.recodeNum, tablename);
+			JSONArray data_a = requestToQanat(RECODENUM, tablename);
 			
 			if(data_a == null){
 				System.out.println("[QanatPlugin] requestError Occurred");
@@ -541,7 +524,7 @@ public class PluginServiceImpl implements PluginService {
 			System.out.println(">>>>>>>>>>>>>>>>>> Table Read Begin:"
 					+ tablename);
 			
-			JSONArray data_a = requestToQanat(this.dataValue, tablename);
+			JSONArray data_a = requestToQanat(DATAVALUE, tablename);
 			if(data_a == null){
 				System.out.println("[QanatPlugin] requestError Occurred");
 				map.put("servicename", serviceName);
@@ -738,28 +721,28 @@ public class PluginServiceImpl implements PluginService {
 	 * 
 	 * @author JBAT
 	 * @param dataset
-	 * @param qanatServiceName
+	 * @param serviceURL
 	 * @return
 	 * @throws ParseException
 	 * @throws JsonProcessingException 
 	 */
-	private JSONArray requestToQanat(String qanatServiceName,
-			String tablename) throws ParseException, JsonProcessingException, Exception {
+	private JSONArray requestToQanat(final String serviceURL,
+			final String tablename) throws ParseException, JsonProcessingException, Exception {
 		System.out.println("[Qanat Plugin] Request Start");
 		String qanatDomain = "http://" + consumerKey + ":" + port + "/qanat/rest";
-		System.out.println("Request Service : " + qanatServiceName);
+		System.out.println("Request Service : " + serviceURL);
 		System.out.println("Request table   : " + tablename);
 		System.out.println("Request URL     : " + qanatDomain);
 
 		Client client = ClientBuilder.newClient()
 				.register(JacksonFeature.class);
 		WebTarget target = client.target(qanatDomain);
-		target = target.path(qanatServiceName);
+		target = target.path(serviceURL);
 		Invocation.Builder builder = target.request();
 
 		// Define Request
 		Request request = new Request();
-		RequestorMember requestMember = makeRequestMember(qanatServiceName, tablename);
+		RequestorMember requestMember = makeRequestMember(serviceURL, tablename);
 		if (requestMember == null) {
 			System.out.println("[QanatPlugin] make requestMember Error");
 			throw new IllegalArgumentException("ïsê≥Ç»ÉÅÉìÉoÇ≈Ç∑ÅB");
@@ -794,20 +777,20 @@ public class PluginServiceImpl implements PluginService {
 	}
 	
 	
-	private RequestorMember makeRequestMember(final String serviceName,
+	private RequestorMember makeRequestMember(final String serviceURL,
 			final String tablename) {
 		RequestorMember reqmem = new RequestorMember();
 		reqmem.setUser(username);
 		reqmem.setPass(password);
-		if (serviceName.equals("qanapptablelist")) {
+		if (serviceURL.equals("qanapptablelist")) {
 			reqmem.setUtype(userType);
-		} else if (serviceName.equals("qanapprecordinfo")) {
+		} else if (serviceURL.equals("qanapprecordinfo")) {
 			reqmem.setTablename(tablename);
 			reqmem.setUtype(userType);
-		} else if (serviceName.equals("qanapprecordcount")) {
+		} else if (serviceURL.equals("qanapprecordcount")) {
 			reqmem.setTablename(tablename);
 			reqmem.setUtype(userType);
-		} else if (serviceName.equals("qanapprecordvalue")) {
+		} else if (serviceURL.equals("qanapprecordvalue")) {
 			reqmem.setTablename(tablename);
 			reqmem.setUtype(userType);
 		} else {

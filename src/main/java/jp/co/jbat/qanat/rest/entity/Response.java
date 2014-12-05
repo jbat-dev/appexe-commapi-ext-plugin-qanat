@@ -1,10 +1,10 @@
-package com.jbat.http.rest.entity;
+package jp.co.jbat.qanat.rest.entity;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Response {
-	private List<Object> data = new ArrayList<>();
+	private List<Object> data = new ArrayList<Object>();
 	
 	public Response() {
 		data.clear();

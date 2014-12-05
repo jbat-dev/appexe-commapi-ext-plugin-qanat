@@ -1,4 +1,4 @@
-package com.jbat.http.rest.entity;
+package jp.co.jbat.qanat.rest.entity;
 
 import java.io.Serializable;
 import java.util.ArrayList;
