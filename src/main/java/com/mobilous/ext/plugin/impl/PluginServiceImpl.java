@@ -1,9 +1,12 @@
 package com.mobilous.ext.plugin.impl;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -74,10 +77,10 @@ public class PluginServiceImpl implements PluginService {
 		port = "80";
 
 // TODO For TEST
-//consumerKey = "54.65.87.122";
-consumerKey = "10.60.46.241";
+consumerKey = "54.65.87.122";
+//consumerKey = "10.60.46.241";
 username = "cvadmin";
-password = "";
+password = "cvadmin";
 authtype = "custom";
 domain = "syajims01.mobilous.com";
 
@@ -146,10 +149,10 @@ domain = "syajims01.mobilous.com";
 							+ consumerKey);
 					
 					// !! cousumerSecret is Qanat port number. !!
-					port = eElement.getElementsByTagName("consumerSecret")
-							.item(0).getTextContent();
-					System.out.println("(port)consumerSecret : "
-							+ port);
+//					port = eElement.getElementsByTagName("consumerSecret")
+//							.item(0).getTextContent();
+//					System.out.println("(port)consumerSecret : "
+//							+ port);
 					
 					domain = eElement.getElementsByTagName("domain").item(0)
 							.getTextContent();
@@ -312,7 +315,7 @@ domain = "syajims01.mobilous.com";
 				JSONArray data_a = requestToQanat(COLUMNDATA, tablename);
 				
 				if(data_a == null || data_a.isEmpty()){
-					System.out.println("[QanatPlugin] requestError ");
+					System.out.println("[QanatPlugin] [ERROR] requestError ");
 					schema.put("auth_status", "invalid");
 					return schema;
 				}else {
@@ -368,7 +371,7 @@ domain = "syajims01.mobilous.com";
 				}
 			}
 		} catch (Exception e) {
-			System.err.println("[QanatPlugin] getSchema Error");
+			System.out.println("[QanatPlugin] [ERROR] getSchema Error");
 			e.printStackTrace();
 			schema.put("auth_status", "invalid");
 			return schema;
@@ -408,7 +411,7 @@ domain = "syajims01.mobilous.com";
 			JSONArray data_a = requestToQanat(RECODENUM, tablename);
 			
 			if(data_a == null || data_a.isEmpty()){
-				System.out.println("[QanatPlugin] requestError Occurred");
+				System.out.println("[QanatPlugin] [ERROR] requestError Occurred");
 				map.put("servicename", serviceName);
 				map.put("auth_status", "invalid");
 				return map;
@@ -420,7 +423,7 @@ domain = "syajims01.mobilous.com";
 			map.put(DatasetKey.NUMBEROFRECORD.getKey(), recodenum);
 
 		} catch (Exception e) {
-			System.err.println("[QanatPlugin] numrecord Error");
+			System.out.println("[QanatPlugin] [ERROR] numrecord Error");
 			e.printStackTrace();
 			map.put("servicename", serviceName);
 			map.put("auth_status", "invalid");
@@ -488,32 +491,10 @@ domain = "syajims01.mobilous.com";
 				return map;
 			}
 			
-
-
-			/*
-			 * if (tablename.equals("TestTable")) {
-			 * 
-			 * map.put(DatasetKey.DATA.getKey(), createDummyResult(),
-			 * JSONArray.class); } else if (tablename.equals("QanatTestTable"))
-			 * {
-			 * 
-			 * JSONArray array = requestToQanat(dataset, "Srv01");
-			 * map.put(DatasetKey.DATA.getKey(), array, JSONArray.class);
-			 * 
-			 * } else if (tablename.equals("Zaiko")) {
-			 * 
-			 * JSONArray array = requestToQanat(dataset, "StockMaster");
-			 * map.put(DatasetKey.DATA.getKey(), array, JSONArray.class); //
-			 * map.put(DatasetKey.DATA.getKey(), // createDummyResultForZaiko(),
-			 * JSONArray.class);
-			 * 
-			 * } else { throw new Exception("invalid table name: " + tablename);
-			 * }
-			 */
 			map.put(DatasetKey.DATA.getKey(), data_a, JSONArray.class);
 
 		} catch (Exception e) {
-			System.err.println("[QanatPlugin] [ERROR] Read Error");
+			System.out.println("[QanatPlugin] [ERROR] Read Error");
 			e.printStackTrace();
 			map.put("servicename", serviceName);
 			map.put("auth_status", "invalid");
@@ -559,8 +540,9 @@ domain = "syajims01.mobilous.com";
 		return map;
 	}
 
+	
 	/**
-	 * ForREST Architecture Using 
+	 * For REST Architecture
 	 * 
 	 * @author JBAT
 	 * @param dataset
@@ -572,19 +554,20 @@ domain = "syajims01.mobilous.com";
 	 */
 	private JSONArray requestToQanat(final String serviceURL,
 			final String tablename) throws ParseException, JsonProcessingException, Exception {
-		System.out.println("[QanatPlugin] Request Start");
+
 		String qanatDomain = "http://" + consumerKey + ":" + port + "/qanat/rest";
+
+		System.out.println("[QanatPlugin] Request Start");
 		System.out.println("[QanatPlugin] Request Service : " + serviceURL);
 		System.out.println("[QanatPlugin] Request table   : " + tablename);
 		System.out.println("[QanatPlugin] Request URL     : " + qanatDomain + "/" + serviceURL);
-
 
 		// Define Request
 		QanatRequest request = new QanatRequest();
 		QanatRequestMember requestMember = makeRequestMember(serviceURL, tablename);
 		if (requestMember == null) {
 			System.out.println("[QanatPlugin] [ERROR] make requestMember Error");
-			throw new IllegalArgumentException("ïsê≥Ç»ÉÅÉìÉoÇ≈Ç∑ÅB");
+			throw new IllegalArgumentException("[QanatPlugin] [ERROR] incorrect reqestmember.");
 		}
 		request.getData().add(requestMember);
 		
@@ -592,6 +575,7 @@ domain = "syajims01.mobilous.com";
 		String jsonstr;
 		ObjectMapper mapper = new ObjectMapper();
 		jsonstr = mapper.writeValueAsString(request);
+		//TODO
 		System.out.println("requestData _start");
 		System.out.println(jsonstr);
 		System.out.println("requestData_end");
@@ -600,12 +584,24 @@ domain = "syajims01.mobilous.com";
 		Client client = ClientBuilder.newClient();
 		WebTarget target = client.target(qanatDomain).path(serviceURL);
 
-		Response response = target.request().post(Entity.entity(request, MediaType.APPLICATION_JSON));
+		Response response = null;
+		SimpleDateFormat DF = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
+		try{
+			System.out.println("[QanatPlugin] [Time] Request Start   : " + DF.format(new Date()));
+			response = target.request().post(Entity.entity(request, MediaType.APPLICATION_JSON));
+		} catch (ProcessingException e){
+			System.out.println("[QanatPlugin] [ERROR] Request Error Occurred");
+			throw e;
+		} finally {
+			System.out.println("[QanatPlugin] [Time] Request End     : " + DF.format(new Date()));
+		}
+		
 		if(response.getStatus() == 200){
 			QanatResponse data = new QanatResponse();			
 			data = response.readEntity(QanatResponse.class);
 			jsonstr = mapper.writeValueAsString(data.getData());
 			JSONArray json_a = (JSONArray)JSONValue.parse(jsonstr);
+			//TODO
 			System.out.println("responseData _start");
 			System.out.println(json_a);
 			System.out.println("responseData_end");
@@ -615,14 +611,12 @@ domain = "syajims01.mobilous.com";
 			return null;
 		} else if (response.getStatus() == 500){
 			System.out.println("[QanatPlugin] [ERROR] Qanat Server Internal Error Occurred");
-
 			QanatErrorResponse error = new QanatErrorResponse();
 			error = response.readEntity(QanatErrorResponse.class);
 			jsonstr = mapper.writeValueAsString(error.getError());
 			System.out.println("500Error _start");
 			System.out.println("Qanat Message : " + error.getError().getMessage());
 			System.out.println("Qanat Trace   : " + error.getError().getTrace());
-			System.out.println(jsonstr);
 			System.out.println("500seError_end");
 			return null;
 		} else if (response.getStatus() == 503){
