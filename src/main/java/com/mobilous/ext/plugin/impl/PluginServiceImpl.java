@@ -16,6 +16,7 @@ import javax.ws.rs.core.Response;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import jp.co.jbat.qanat.rest.util.QanatProperty;
 import jp.co.jbat.qanat.rest.entity.QanatErrorResponse;
 import jp.co.jbat.qanat.rest.entity.QanatRequest;
 import jp.co.jbat.qanat.rest.entity.QanatRequestMember;
@@ -63,12 +64,6 @@ public class PluginServiceImpl implements PluginService {
 	
 	// for qanat
 	private static String userType = "310";
-	// TODO make Property DATA
-	private static final String TABLELIST = "qanapptablelist";
-	private static final String COLUMNDATA = "qanapprecordinfo";
-	private static final String RECODENUM = "qanapprecordcount";
-	private static final String DATAVALUE = "qanapprecordvalue";
-
 
 	public PluginServiceImpl() {
 
@@ -283,7 +278,7 @@ domain = "syajims01.mobilous.com";
 			
 			if (tablename == null || StringUtils.isBlank(tablename)) {
 				System.out.println("[QanatPlugin] >>>>>>>>>>>>>>>>>>Table begin added");
-				JSONArray data_a = requestToQanat(TABLELIST, tablename);
+				JSONArray data_a = requestToQanat(QanatProperty.TABLELIST, tablename);
 				
 				if(data_a == null || data_a.isEmpty()){
 					System.out.println("[QanatPlugin] [ERROR] request Error [Check DataBase Username Password");
@@ -312,7 +307,7 @@ domain = "syajims01.mobilous.com";
 				List<String> dateFields = new ArrayList<String>();
 				List<String> booleanFields = new ArrayList<String>();
 			
-				JSONArray data_a = requestToQanat(COLUMNDATA, tablename);
+				JSONArray data_a = requestToQanat(QanatProperty.COLUMNDATA, tablename);
 				
 				if(data_a == null || data_a.isEmpty()){
 					System.out.println("[QanatPlugin] [ERROR] requestError ");
@@ -408,7 +403,7 @@ domain = "syajims01.mobilous.com";
 //				String retStr = requestToQanatDummy("numrecord");
 			}
 
-			JSONArray data_a = requestToQanat(RECODENUM, tablename);
+			JSONArray data_a = requestToQanat(QanatProperty.RECODENUM, tablename);
 			
 			if(data_a == null || data_a.isEmpty()){
 				System.out.println("[QanatPlugin] [ERROR] requestError Occurred");
@@ -483,7 +478,7 @@ domain = "syajims01.mobilous.com";
 			System.out.println("[QanatPlugin] >>>>>>>>>>>>>>>>>> Read Begin:"
 					+ tablename);
 			
-			JSONArray data_a = requestToQanat(DATAVALUE, tablename);
+			JSONArray data_a = requestToQanat(QanatProperty.DATAVALUE, tablename);
 			if(data_a == null || data_a.isEmpty()){
 				System.out.println("[QanatPlugin] [ERROR] request Error Occurred");
 				map.put("servicename", serviceName);
@@ -640,15 +635,15 @@ domain = "syajims01.mobilous.com";
 		QanatRequestMember reqmem = new QanatRequestMember();
 		reqmem.setUser(username);
 		reqmem.setPass(password);
-		if (serviceURL.equals("qanapptablelist")) {
+		if (serviceURL.equals(QanatProperty.TABLELIST)) {
 			reqmem.setUtype(userType);
-		} else if (serviceURL.equals("qanapprecordinfo")) {
+		} else if (serviceURL.equals(QanatProperty.COLUMNDATA)) {
 			reqmem.setTablename(tablename);
 			reqmem.setUtype(userType);
-		} else if (serviceURL.equals("qanapprecordcount")) {
+		} else if (serviceURL.equals(QanatProperty.RECODENUM)) {
 			reqmem.setTablename(tablename);
 			reqmem.setUtype(userType);
-		} else if (serviceURL.equals("qanapprecordvalue")) {
+		} else if (serviceURL.equals(QanatProperty.DATAVALUE)) {
 			reqmem.setTablename(tablename);
 			reqmem.setUtype(userType);
 		} else {
