@@ -143,7 +143,7 @@ domain = "syajims01.mobilous.com";
 					System.out.println("consumerKey : "
 							+ consumerKey);
 					
-					// !! cousumerSecret is Qanat port number. !!
+//					// !! cousumerSecret using Qanat port number. !!
 //					port = eElement.getElementsByTagName("consumerSecret")
 //							.item(0).getTextContent();
 //					System.out.println("(port)consumerSecret : "
@@ -566,11 +566,10 @@ domain = "syajims01.mobilous.com";
 		}
 		request.getData().add(requestMember);
 		
-		// Show Request Json
+		//TODO Show Request Json for TEST
 		String jsonstr;
 		ObjectMapper mapper = new ObjectMapper();
 		jsonstr = mapper.writeValueAsString(request);
-		//TODO
 		System.out.println("requestData _start");
 		System.out.println(jsonstr);
 		System.out.println("requestData_end");
@@ -591,12 +590,13 @@ domain = "syajims01.mobilous.com";
 			System.out.println("[QanatPlugin] [Time] Request End     : " + DF.format(new Date()));
 		}
 		
+		// Recognize HTTP Status Code
 		if(response.getStatus() == 200){
 			QanatResponse data = new QanatResponse();			
 			data = response.readEntity(QanatResponse.class);
 			jsonstr = mapper.writeValueAsString(data.getData());
 			JSONArray json_a = (JSONArray)JSONValue.parse(jsonstr);
-			//TODO
+			//TODO for TEST
 			System.out.println("responseData _start");
 			System.out.println(json_a);
 			System.out.println("responseData_end");
