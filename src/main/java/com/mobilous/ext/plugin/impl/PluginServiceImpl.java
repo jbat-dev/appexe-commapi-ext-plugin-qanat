@@ -21,6 +21,7 @@ import jp.co.jbat.qanat.rest.entity.QanatErrorResponse;
 import jp.co.jbat.qanat.rest.entity.QanatRequest;
 import jp.co.jbat.qanat.rest.entity.QanatRequestMember;
 import jp.co.jbat.qanat.rest.entity.QanatResponse;
+
 import net.xeoh.plugins.base.annotations.Capabilities;
 import net.xeoh.plugins.base.annotations.PluginImplementation;
 
@@ -35,6 +36,7 @@ import org.w3c.dom.NodeList;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.mobilous.ext.plugin.PluginService;
 import com.mobilous.ext.plugin.constant.Constant;
 import com.mobilous.ext.plugin.constant.DatasetKey;
@@ -69,15 +71,15 @@ public class PluginServiceImpl implements PluginService {
 
 		// default values
 		serviceName = "Qanat";
-		port = "80";
+		port = "6201";
 
 // TODO For TEST
-consumerKey = "54.65.87.122";
-//consumerKey = "10.60.46.241";
+//consumerKey = "54.65.87.122";
+consumerKey = "10.60.46.241";
 username = "cvadmin";
 password = "cvadmin";
 authtype = "custom";
-domain = "syajims01.mobilous.com";
+domain = "jbatsw.mobilous.com";
 
 		// Do not change
 		callbackURL = "https://" + domain
@@ -113,7 +115,7 @@ domain = "syajims01.mobilous.com";
 					"comm-server/ext/plugins/" + pluginConfigFile);
 			if (!fXmlFile.exists()) {
 				System.out
-						.println("PLUGIN : loadSettingsFromConfigfile file does not exist. use default settings.- "
+						.println("[QanatPlugin] : loadSettingsFromConfigfile file does not exist. use default settings.- "
 								+ fXmlFile.getAbsolutePath());
 				return;
 			}
@@ -135,12 +137,12 @@ domain = "syajims01.mobilous.com";
 
 					serviceName = eElement.getElementsByTagName("servicename")
 							.item(0).getTextContent();
-					System.out.println("servicename : "
+					System.out.println("[QanatPlugin] servicename : "
 							+ serviceName);
 					
 					consumerKey = eElement.getElementsByTagName("consumerkey")
 							.item(0).getTextContent();
-					System.out.println("consumerKey : "
+					System.out.println("[QanatPlugin] consumerKey : "
 							+ consumerKey);
 					
 //					// !! cousumerSecret using Qanat port number. !!
@@ -151,17 +153,17 @@ domain = "syajims01.mobilous.com";
 					
 					domain = eElement.getElementsByTagName("domain").item(0)
 							.getTextContent();
-					System.out.println("domain : "
+					System.out.println("[QanatPlugin] domain : "
 							+ domain);
 					
 					username = eElement.getElementsByTagName("username")
 							.item(0).getTextContent();
-					System.out.println("username : "
+					System.out.println("[QanatPlugin] username : "
 							+ username);
 					
 					password = eElement.getElementsByTagName("password")
 							.item(0).getTextContent();
-					System.out.println("password : "
+					System.out.println("[QanatPlugin] password : "
 							+ password);
 				}
 			}
@@ -313,7 +315,7 @@ domain = "syajims01.mobilous.com";
 					System.out.println("[QanatPlugin] [ERROR] requestError ");
 					schema.put("auth_status", "invalid");
 					return schema;
-				}else {
+				} else {
 					System.out.println("[QanatPlugin] Response comming");
 				}
 			
@@ -537,7 +539,7 @@ domain = "syajims01.mobilous.com";
 
 	
 	/**
-	 * For REST Architecture
+	 * REST Architecture for Qanat
 	 * 
 	 * @author JBAT
 	 * @param dataset
@@ -558,36 +560,47 @@ domain = "syajims01.mobilous.com";
 		System.out.println("[QanatPlugin] Request URL     : " + qanatDomain + "/" + serviceURL);
 
 		// Define Request
-		QanatRequest request = new QanatRequest();
+		QanatRequest qanatRequest = new QanatRequest();
 		QanatRequestMember requestMember = makeRequestMember(serviceURL, tablename);
 		if (requestMember == null) {
 			System.out.println("[QanatPlugin] [ERROR] make requestMember Error");
 			throw new IllegalArgumentException("[QanatPlugin] [ERROR] incorrect reqestmember.");
 		}
-		request.getData().add(requestMember);
+		qanatRequest.getData().add(requestMember);
 		
-		//TODO Show Request Json for TEST
+		//TODO Show Request JSON for TEST
 		String jsonstr;
 		ObjectMapper mapper = new ObjectMapper();
-		jsonstr = mapper.writeValueAsString(request);
+		jsonstr = mapper.writeValueAsString(qanatRequest);
 		System.out.println("requestData _start");
 		System.out.println(jsonstr);
 		System.out.println("requestData_end");
+		//TODO erase upper code
+		
+		// Make client & target
+		org.glassfish.jersey.client.JerseyClient client =  org.glassfish.jersey.client.JerseyClientBuilder.createClient();
+		org.glassfish.jersey.client.JerseyWebTarget target = client.target(qanatDomain).path(serviceURL);
 		
 		// Fetch Data
-		Client client = ClientBuilder.newClient();
-		WebTarget target = client.target(qanatDomain).path(serviceURL);
-
 		Response response = null;
-		SimpleDateFormat DF = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
+
 		try{
-			System.out.println("[QanatPlugin] [Time] Request Start   : " + DF.format(new Date()));
-			response = target.request().post(Entity.entity(request, MediaType.APPLICATION_JSON));
+			System.out.println("[QanatPlugin] [Time] Request Start   : " + sdf.format(new Date()));
+			
+			org.glassfish.jersey.client.JerseyInvocation.Builder builder = target.request();
+			response = builder.post(Entity.entity(qanatRequest, MediaType.APPLICATION_JSON));
+			
+//			response = target.request().post(Entity.entity(qanatRequest, MediaType.APPLICATION_JSON));
+			
 		} catch (ProcessingException e){
 			System.out.println("[QanatPlugin] [ERROR] Request Error Occurred");
 			throw e;
+		} catch (Exception e){
+			System.out.println("[QanatPlugin] [ERROR] Anknown Error Occurred");
+			throw e;
 		} finally {
-			System.out.println("[QanatPlugin] [Time] Request End     : " + DF.format(new Date()));
+			System.out.println("[QanatPlugin] [Time] Request End     : " + sdf.format(new Date()));
 		}
 		
 		// Recognize HTTP Status Code
