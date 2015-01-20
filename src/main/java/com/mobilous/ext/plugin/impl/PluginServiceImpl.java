@@ -4,13 +4,13 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.ProcessingException;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.parsers.DocumentBuilder;
@@ -21,7 +21,6 @@ import jp.co.jbat.qanat.rest.entity.QanatErrorResponse;
 import jp.co.jbat.qanat.rest.entity.QanatRequest;
 import jp.co.jbat.qanat.rest.entity.QanatRequestMember;
 import jp.co.jbat.qanat.rest.entity.QanatResponse;
-
 import net.xeoh.plugins.base.annotations.Capabilities;
 import net.xeoh.plugins.base.annotations.PluginImplementation;
 
@@ -36,7 +35,6 @@ import org.w3c.dom.NodeList;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import com.mobilous.ext.plugin.PluginService;
 import com.mobilous.ext.plugin.constant.Constant;
 import com.mobilous.ext.plugin.constant.DatasetKey;
@@ -71,11 +69,11 @@ public class PluginServiceImpl implements PluginService {
 
 		// default values
 		serviceName = "Qanat";
-		port = "6201";
+		port = "80";
 
 // TODO For TEST
-//consumerKey = "54.65.87.122";
-consumerKey = "10.60.46.241";
+consumerKey = "54.65.87.122";
+//consumerKey = "10.60.46.241";
 username = "cvadmin";
 password = "cvadmin";
 authtype = "custom";
@@ -270,6 +268,7 @@ domain = "jbatsw.mobilous.com";
 	 * be set on the application. This function should return the tables and
 	 * fieldnames that will be available for AppExe application.
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public HeterogeneousMap getSchema(HeterogeneousMap dataset) {
 		
@@ -289,12 +288,15 @@ domain = "jbatsw.mobilous.com";
 				} else {
 					System.out.println("[QanatPlugin] Response comming");
 				}
-							
-				for(Integer i = 0; i < data_a.size(); i++){
-					JSONObject tableData = (JSONObject)data_a.get(i);
-					String  tableName= (String)tableData.get(i.toString());
+				
+				Map<String, String> data_map = new LinkedHashMap<String, String>();
+				data_map = (Map<String, String>)data_a.get(0); 
+				
+				for(Integer i = 0; i < data_map.size(); i++){
+					String  tableName= (String)data_map.get(i.toString());
 					tables.add(tableName);
 				}
+				
 				System.out.println("[QanatPlugin] Tables : " + tables);
 				schema.put(DatasetKey.SCHEMA.getKey(), tables, List.class);
 				
@@ -578,8 +580,13 @@ domain = "jbatsw.mobilous.com";
 		//TODO erase upper code
 		
 		// Make client & target
+		// org.glassfish version
 		org.glassfish.jersey.client.JerseyClient client =  org.glassfish.jersey.client.JerseyClientBuilder.createClient();
 		org.glassfish.jersey.client.JerseyWebTarget target = client.target(qanatDomain).path(serviceURL);
+
+//		Client client =  ClientBuilder.newClient();
+//		WebTarget target = client.target(qanatDomain).path(serviceURL);
+		
 		
 		// Fetch Data
 		Response response = null;
@@ -587,10 +594,15 @@ domain = "jbatsw.mobilous.com";
 
 		try{
 			System.out.println("[QanatPlugin] [Time] Request Start   : " + sdf.format(new Date()));
-			
+
+			// org.glassfish version
 			org.glassfish.jersey.client.JerseyInvocation.Builder builder = target.request();
-			response = builder.post(Entity.entity(qanatRequest, MediaType.APPLICATION_JSON));
+
+//			Builder builder = target.request();
 			
+			response = builder.post(Entity.entity(qanatRequest, MediaType.APPLICATION_JSON));
+
+//			ClientResponse clientResponse = 
 //			response = target.request().post(Entity.entity(qanatRequest, MediaType.APPLICATION_JSON));
 			
 		} catch (ProcessingException e){
@@ -605,14 +617,16 @@ domain = "jbatsw.mobilous.com";
 		
 		// Recognize HTTP Status Code
 		if(response.getStatus() == 200){
-			QanatResponse data = new QanatResponse();			
-			data = response.readEntity(QanatResponse.class);
+			QanatResponse data = new QanatResponse();
+			data = response.readEntity(QanatResponse.class); // xml error
 			jsonstr = mapper.writeValueAsString(data.getData());
 			JSONArray json_a = (JSONArray)JSONValue.parse(jsonstr);
+
 			//TODO for TEST
 			System.out.println("responseData _start");
 			System.out.println(json_a);
 			System.out.println("responseData_end");
+
 			return json_a;
 		} else if (response.getStatus() == 404) {
 			System.out.println("[QanatPlugin] [ERROR] Qanat Server NOT found.");
