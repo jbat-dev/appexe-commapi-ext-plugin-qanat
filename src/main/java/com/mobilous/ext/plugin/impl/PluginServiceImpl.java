@@ -282,7 +282,7 @@ domain = "jbatsw.mobilous.com";
 				JSONArray data_a = requestToQanat(QanatProperty.TABLELIST, tablename);
 				
 				if(data_a == null || data_a.isEmpty()){
-					System.out.println("[QanatPlugin] [ERROR] request Error [Check DataBase Username Password");
+					System.out.println("[QanatPlugin] [ERROR] Response data is null [Check DataBase Username Password");
 					schema.put("auth_status", "invalid");
 					return schema;
 				} else {
@@ -410,7 +410,7 @@ domain = "jbatsw.mobilous.com";
 			JSONArray data_a = requestToQanat(QanatProperty.RECODENUM, tablename);
 			
 			if(data_a == null || data_a.isEmpty()){
-				System.out.println("[QanatPlugin] [ERROR] requestError Occurred");
+				System.out.println("[QanatPlugin] [ERROR] response data is null");
 				map.put("servicename", serviceName);
 				map.put("auth_status", "invalid");
 				return map;
@@ -484,7 +484,7 @@ domain = "jbatsw.mobilous.com";
 			
 			JSONArray data_a = requestToQanat(QanatProperty.DATAVALUE, tablename);
 			if(data_a == null || data_a.isEmpty()){
-				System.out.println("[QanatPlugin] [ERROR] request Error Occurred");
+				System.out.println("[QanatPlugin] [ERROR] response data is null");
 				map.put("servicename", serviceName);
 				map.put("auth_status", "invalid");
 				return map;
