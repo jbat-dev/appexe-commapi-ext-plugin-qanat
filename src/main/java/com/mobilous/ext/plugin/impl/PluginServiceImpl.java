@@ -4,7 +4,6 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,10 +54,11 @@ public class PluginServiceImpl implements PluginService {
 	private static String username;
 	private static String password;
 	private static String authtype;
-	@SuppressWarnings("unused")
-	private static String callbackURL;
+//	@SuppressWarnings("unused")
+//	private static String callbackURL;
 	private static String domain;
-	private static String port;  // Using consumerSecret
+
+//	private static String port;  // Using consumerSecret
 	private static String pluginFile;
 	private static String pluginConfigFile;
 	
@@ -69,28 +69,30 @@ public class PluginServiceImpl implements PluginService {
 
 		// default values
 		serviceName = "Qanat";
-		port = "80";
+
 
 // TODO For TEST
-consumerKey = "54.65.87.122";
+//consumerKey = "54.65.87.122";
 //consumerKey = "10.60.46.241";
-username = "cvadmin";
-password = "cvadmin";
-authtype = "custom";
-domain = "jbatsw.mobilous.com";
+//username = "cvadmin";
+//password = "cvadmin";
+//authtype = "custom";
+////port = "80";
+//domain = "jbatsw.mobilous.com";
+//
 
 		// Do not change
-		callbackURL = "https://" + domain
-				+ ":8181/commapi/extsvc/authenticate?servicename="
-				+ serviceName;
-
-		pluginFile = "appexe-commapi-ext-plugin-qanat.jar";
+//		callbackURL = "https://" + domain
+//				+ ":8181/commapi/extsvc/authenticate?servicename="
+//				+ serviceName;
+		
 
 		// update the plugin config filename should be same with plugin filename
 		// the, extension name shoud be ".xml" if the plugin filename will be changed
 		// update this
-		
-		pluginConfigFile = "appexe-commapi-ext-plugin-qanat.xml";
+		final String FILE_NAME = "appexe-commapi-ext-plugin-qanat_2015-03-12";
+		pluginFile = FILE_NAME + ".jar";
+		pluginConfigFile = FILE_NAME + ".xml";
 
 		loadSettingsFromConfigfile();
 
@@ -142,13 +144,13 @@ domain = "jbatsw.mobilous.com";
 							.item(0).getTextContent();
 					System.out.println("[QanatPlugin] consumerKey : "
 							+ consumerKey);
-					
-//					// !! cousumerSecret using Qanat port number. !!
+//
+// FIXME Nullpointer Error Occurred
 //					port = eElement.getElementsByTagName("consumerSecret")
 //							.item(0).getTextContent();
-//					System.out.println("(port)consumerSecret : "
+//					System.out.println("[QanatPlugin] (port) consumerSecret : "
 //							+ port);
-					
+				
 					domain = eElement.getElementsByTagName("domain").item(0)
 							.getTextContent();
 					System.out.println("[QanatPlugin] domain : "
@@ -554,7 +556,7 @@ domain = "jbatsw.mobilous.com";
 	private JSONArray requestToQanat(final String serviceURL,
 			final String tablename) throws ParseException, JsonProcessingException, Exception {
 
-		String qanatDomain = "http://" + consumerKey + ":" + port + "/qanat/rest";
+		String qanatDomain = "http://" + consumerKey + "/qanat/rest";
 
 		System.out.println("[QanatPlugin] Request Start");
 		System.out.println("[QanatPlugin] Request Service : " + serviceURL);
@@ -571,12 +573,12 @@ domain = "jbatsw.mobilous.com";
 		qanatRequest.getData().add(requestMember);
 		
 		//TODO Show Request JSON for TEST
-		String jsonstr;
-		ObjectMapper mapper = new ObjectMapper();
-		jsonstr = mapper.writeValueAsString(qanatRequest);
-		System.out.println("requestData _start");
-		System.out.println(jsonstr);
-		System.out.println("requestData_end");
+String jsonstr;
+ObjectMapper mapper = new ObjectMapper();
+jsonstr = mapper.writeValueAsString(qanatRequest);
+System.out.println("requestData _start");
+System.out.println(jsonstr);
+System.out.println("requestData_end");
 		//TODO erase upper code
 		
 		// Make client & target
