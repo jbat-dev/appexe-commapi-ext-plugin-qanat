@@ -53,6 +53,7 @@ public class PluginServiceImpl implements PluginService {
 	private static String consumerSecret;
 	private static String username;
 	private static String password;
+	@SuppressWarnings("unused")
 	private static String authtype;
 //	@SuppressWarnings("unused")
 //	private static String callbackURL;
@@ -76,7 +77,7 @@ public class PluginServiceImpl implements PluginService {
 //consumerKey = "10.60.46.241";
 //username = "cvadmin";
 //password = "cvadmin";
-//authtype = "custom";
+authtype = "custom";
 ////port = "80";
 //domain = "jbatsw.mobilous.com";
 //
@@ -90,7 +91,7 @@ public class PluginServiceImpl implements PluginService {
 		// update the plugin config filename should be same with plugin filename
 		// the, extension name shoud be ".xml" if the plugin filename will be changed
 		// update this
-		final String FILE_NAME = "appexe-commapi-ext-plugin-qanat_2015-03-12";
+		final String FILE_NAME = "appexe-commapi-ext-plugin-qanat_2015-03-26";
 		pluginFile = FILE_NAME + ".jar";
 		pluginConfigFile = FILE_NAME + ".xml";
 
@@ -188,7 +189,7 @@ public class PluginServiceImpl implements PluginService {
 		map.put(DatasetKey.SERVICENAME.getKey(), serviceName);
 
 		// Supply the authorization login URL on for this plugin.
-		// plugin console will use the URL to to login on the service that this
+		// plugin console will use the URL to login on the service that this
 		// plugin is connecting.
 		// map.put(DatasetKey.AUTHORIZE_URL.getKey(), callbackURL); //optional
 
@@ -205,6 +206,7 @@ public class PluginServiceImpl implements PluginService {
 	@Override
 	public HeterogeneousMap authenticate(HeterogeneousMap dataset) {
 		HeterogeneousMap retVal = new HeterogeneousMap();
+		/*
 
 		if (authtype.equalsIgnoreCase(Constant.OAUTH1.getValue())
 				|| authtype.equalsIgnoreCase(Constant.OAUTH2.getValue())) {
@@ -218,15 +220,6 @@ public class PluginServiceImpl implements PluginService {
 				// code, this plugin returns the login URL for the device to
 				// login and receive the authorization code.
 
-				/*
-				 * SALES FORCE SAMPLE CODE OAuth2Parameters oauthParams = new
-				 * OAuth2Parameters(); oauthParams.setRedirectUri(callbackURL);
-				 * retVal.put("authorize_url",
-				 * connectionFactory.getOAuthOperations
-				 * ().buildAuthorizeUrl(GrantType.AUTHORIZATION_CODE,
-				 * oauthParams));
-				 */
-
 				retVal.put("auth_status", "invalid");	// USE CUSTOM
 				retVal.put(DatasetKey.AUTH_TYPE.getKey(), "OAuth2");
 				retVal.put(DatasetKey.SERVICENAME.getKey(), serviceName);
@@ -237,14 +230,6 @@ public class PluginServiceImpl implements PluginService {
 				// code to access grant.
 
 				// String code = dataset.get("code");
-				/*
-				 * SALES FORCE SAMPLE CODE //AccessGrant accessGrant =
-				 * connectionFactory
-				 * .getOAuthOperations().exchangeForAccess(code, callbackURL,
-				 * null); retVal.put("auth_type", "OAuth2");
-				 * retVal.put("user_connection", accessGrant,
-				 * AccessGrant.class);
-				 */
 				retVal.put("auth_status", "invalid");	// USE CUSTOM
 				retVal.put(DatasetKey.AUTH_TYPE.getKey(), "OAuth2");
 				retVal.put(DatasetKey.SERVICENAME.getKey(), serviceName);
@@ -262,7 +247,13 @@ public class PluginServiceImpl implements PluginService {
 			retVal.put("auth_status", "valid");
 
 		}
+		*/
+		retVal.put(DatasetKey.AUTH_TYPE.getKey(), Constant.CUSTOM.getValue()); // or authtype
+		retVal.put(DatasetKey.SERVICENAME.getKey(), serviceName);
+ 		retVal.put(DatasetKey.AUTH_STATUS.getKey(), Constant.AUTH_STATUS_VALID.getValue());
+
 		return retVal;
+		
 	}
 
 	/**
@@ -472,6 +463,8 @@ public class PluginServiceImpl implements PluginService {
 	@Override
 	public HeterogeneousMap read(HeterogeneousMap dataset) {
 		HeterogeneousMap map = new HeterogeneousMap();
+		map.put(DatasetKey.AUTH_TYPE.getKey(), Constant.CUSTOM.getValue());
+    	map.put(DatasetKey.SERVICENAME.getKey(), serviceName);
 
 		String where = dataset.get(DatasetKey.WHERE.getKey());
 		String tablename = dataset.get(DatasetKey.TABLE.getKey());
@@ -487,22 +480,23 @@ public class PluginServiceImpl implements PluginService {
 			JSONArray data_a = requestToQanat(QanatProperty.DATAVALUE, tablename);
 			if(data_a == null || data_a.isEmpty()){
 				System.out.println("[QanatPlugin] [ERROR] response data is null");
-				map.put("servicename", serviceName);
-				map.put("auth_status", "invalid");
-				return map;
+		      	map.put(DatasetKey.RETURN_STATUS.getKey(), Constant.RET_STATUS_INVALID.getValue());
+		        return map;
 			}
 			
 			map.put(DatasetKey.DATA.getKey(), data_a, JSONArray.class);
-
+         	map.put(DatasetKey.RETURN_STATUS.getKey(), Constant.RET_STATUS_VALID.getValue());
+         	 
 		} catch (Exception e) {
 			System.out.println("[QanatPlugin] [ERROR] Read Error");
 			e.printStackTrace();
-			map.put("servicename", serviceName);
-			map.put("auth_status", "invalid");
-			return map;
+			
+         	map.put(DatasetKey.RETURN_STATUS.getKey(), Constant.RET_STATUS_INVALID.getValue());
+         	map.put(DatasetKey.ERROR_CODE.getKey(), "[Qanat Plugin] ReadError.");
+         	map.put(DatasetKey.ERROR_MESSAGE.getKey(), "[Qanat Plugin] Read　Exception.");
+         	return map;
 		}
-		map.put("servicename", serviceName);
-		map.put("auth_status", "valid");
+
 		return map;
 
 	}
@@ -600,12 +594,7 @@ System.out.println("requestData_end");
 			// org.glassfish version
 			org.glassfish.jersey.client.JerseyInvocation.Builder builder = target.request();
 
-//			Builder builder = target.request();
-			
 			response = builder.post(Entity.entity(qanatRequest, MediaType.APPLICATION_JSON));
-
-//			ClientResponse clientResponse = 
-//			response = target.request().post(Entity.entity(qanatRequest, MediaType.APPLICATION_JSON));
 			
 		} catch (ProcessingException e){
 			System.out.println("[QanatPlugin] [ERROR] Request Error Occurred");
@@ -624,10 +613,11 @@ System.out.println("requestData_end");
 			jsonstr = mapper.writeValueAsString(data.getData());
 			JSONArray json_a = (JSONArray)JSONValue.parse(jsonstr);
 
-			//TODO for TEST
+			//TODO erase under that's for TEST
 			System.out.println("responseData _start");
 			System.out.println(json_a);
 			System.out.println("responseData_end");
+			//TODO 
 
 			return json_a;
 		} else if (response.getStatus() == 404) {

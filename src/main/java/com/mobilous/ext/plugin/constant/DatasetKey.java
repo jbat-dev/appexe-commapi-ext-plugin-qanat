@@ -5,27 +5,30 @@ package com.mobilous.ext.plugin.constant;
  *
  * Please do not modify this file.
  *
- * @author yanto
+ * @author Mobilous
  */
 public enum DatasetKey {
 
 	ACCESS_TOKEN("access_token"),
 	AUTH_TYPE("auth_type"),
 	AUTHORIZE_URL("authorize_url"),
+	AUTH_STATUS("auth_status"),
 	DATA("data"),
+	// error code for jbat request.
+	ERROR_CODE("error_code"),
+	// error message for jbat request.
+	ERROR_MESSAGE("error_message"),
+	NUMBEROFRECORD("numrec"),
 	OAUTH_VERIFIER("oauth_verifier"),
 	REC("rec"),
 	REQUEST_TOKEN("request_token"),
+	// return status for jbat return request.
+	RETURN_STATUS("return_status"),
 	SCHEMA("schema"),
 	SERVICENAME("servicename"),
 	TABLE("table"),
 	USER_CONNECTION("user_connection"),
-	WHERE("where"),
-    FIELDS("fields"),   // add JBAT
-    ORDER("order"),   // add JBAT
-    LIMIT("limit"),   // add JBAT
-    OFFSET("offset"),   // add JBAT
-	NUMBEROFRECORD("numrec");
+	WHERE("where");
 	
 	private String key;
 

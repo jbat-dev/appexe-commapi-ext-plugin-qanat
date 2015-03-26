@@ -5,14 +5,21 @@ package com.mobilous.ext.plugin.constant;
  *
  * Please do not modify this file.
  *
- * @author yanto
+ * @author Mobilous
  */
 public enum Constant {
 
 	EMPTY_STRING(""),
 	OAUTH1("OAuth1"),
-	OAUTH2("OAuth2");
-
+	OAUTH2("OAuth2"),
+	CUSTOM("custom"),
+	AUTH_STATUS_VALID("valid"),
+	AUTH_STATUS_INVALID("invalid"),
+	AUTH_STATUS_REJECTED("rejected"),
+	RET_STATUS_VALID("valid"),
+	RET_STATUS_INVALID("invalid"),
+	RET_STATUS_REJECTED("rejected");
+	
 	private String value;
 
 	Constant(String value) {
