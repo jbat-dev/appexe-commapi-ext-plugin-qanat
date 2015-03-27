@@ -112,6 +112,27 @@ authtype = "custom";
 	 * */
 	private void loadSettingsFromConfigfile() {
 		try {
+			
+			/* Kiyota-San program */
+			/* To get xmlfile source without change code and jar file name. */
+            // jar:file:/E:/NonBackupData/pleiades/glassfish/glassfish4/glassfish/domains/domain1/config/jbatdebug.jar!/com/mobilous/ext/plugin/impl/PluginServiceImpl.class
+            String strRes = PluginServiceImpl.class.getResource("PluginServiceImpl.class").toString();
+            String jarFile = null;
+            if (strRes != null) {
+                if (strRes.startsWith("jar:file")) {
+                    String tmpJarfile = strRes.substring(0, strRes.indexOf("!"));
+                    jarFile = tmpJarfile.substring(9);
+                    pluginFile = tmpJarfile.substring(tmpJarfile.lastIndexOf("/") + 1);
+                    System.out.println("[Qanat PLUGIN] pluginFile=" + pluginFile);
+                    String tmppluginConfigFile = pluginFile.substring(0, pluginFile.indexOf(".")) + ".xml";
+                    System.out.println("[Qanat PLUGIN] tmppluginConfigFile=" + tmppluginConfigFile);
+                    File fXmlFile = new File("/usr/glassfish", "comm-server/ext/plugins/"+tmppluginConfigFile);
+                    if (fXmlFile.exists()) {
+                        pluginConfigFile = tmppluginConfigFile;
+                    }
+                }
+            }
+			
 			File fXmlFile = new File("/usr/glassfish",
 					"comm-server/ext/plugins/" + pluginConfigFile);
 			if (!fXmlFile.exists()) {
@@ -384,7 +405,9 @@ authtype = "custom";
 	public HeterogeneousMap numrecord(HeterogeneousMap dataset) {
 
 		HeterogeneousMap map = new HeterogeneousMap();
-
+		map.put(DatasetKey.AUTH_TYPE.getKey(), Constant.CUSTOM.getValue()); // or authtype
+ 		map.put(DatasetKey.SERVICENAME.getKey(), serviceName);
+ 
 		String where = dataset.get(DatasetKey.WHERE.getKey());
 		String tablename = dataset.get(DatasetKey.TABLE.getKey());
 
@@ -404,26 +427,25 @@ authtype = "custom";
 			
 			if(data_a == null || data_a.isEmpty()){
 				System.out.println("[QanatPlugin] [ERROR] response data is null");
-				map.put("servicename", serviceName);
-				map.put("auth_status", "invalid");
-				return map;
+	         	map.put(DatasetKey.RETURN_STATUS.getKey(), Constant.RET_STATUS_INVALID.getValue());
+	         	return map;
 			}
 			
 			JSONObject numobj = (JSONObject)data_a.get(0);
 			String recodenum = numobj.get("Count").toString();
 
 			map.put(DatasetKey.NUMBEROFRECORD.getKey(), recodenum);
-
+        	map.put(DatasetKey.RETURN_STATUS.getKey(), Constant.RET_STATUS_VALID.getValue());
+        	 
 		} catch (Exception e) {
 			System.out.println("[QanatPlugin] [ERROR] numrecord Error");
 			e.printStackTrace();
-			map.put("servicename", serviceName);
-			map.put("auth_status", "invalid");
+         	map.put(DatasetKey.RETURN_STATUS.getKey(), Constant.RET_STATUS_INVALID.getValue());
+         	map.put(DatasetKey.ERROR_CODE.getKey(), "[Qanat Plugin] NUMREC ERROR　コード");
+         	map.put(DatasetKey.ERROR_MESSAGE.getKey(), "[Qanat Plugin] NUMREC ERROR　Message");
 			return map;
 		}
 		
-		map.put("servicename", serviceName);
-		map.put("auth_status", "valid");		
 		return map;
 
 	}
