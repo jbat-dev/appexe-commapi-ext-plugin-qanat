@@ -425,7 +425,14 @@ authtype = "custom";
 			
 			if(data_a == null || data_a.isEmpty()){
 				System.out.println("[QanatPlugin] [ERROR] response data is null");
-	         	map.put(DatasetKey.RETURN_STATUS.getKey(), Constant.RET_STATUS_INVALID.getValue());
+
+				map.put(DatasetKey.RETURN_STATUS.getKey(), Constant.RET_STATUS_INVALID.getValue());
+
+		      	System.out.println("ERROR_CODE -> [QanatPlugin] ReadError.");
+				map.put(DatasetKey.ERROR_CODE.getKey(), "[Qanat Plugin] ReadError.");
+				System.out.println("ERROR_MESSAGE -> [QanatPlugin] Read Exception.");
+				map.put(DatasetKey.ERROR_MESSAGE.getKey(), "[QanatPlugin] Read　Exception.");
+				
 	         	return map;
 			}
 			
@@ -438,12 +445,15 @@ authtype = "custom";
 		} catch (Exception e) {
 			System.out.println("[QanatPlugin] [ERROR] numrecord Error");
 			e.printStackTrace();
+			
          	map.put(DatasetKey.RETURN_STATUS.getKey(), Constant.RET_STATUS_INVALID.getValue());
-         	map.put(DatasetKey.ERROR_CODE.getKey(), "[Qanat Plugin] NUMREC ERROR　コード");
+    		System.out.println("ERROR_CODE -> [QanatPlugin] ReadError.");
+    		map.put(DatasetKey.ERROR_CODE.getKey(), "[Qanat Plugin] ReadError.");
+    		System.out.println("ERROR_MESSAGE -> [QanatPlugin] Read Exception.");
          	map.put(DatasetKey.ERROR_MESSAGE.getKey(), "[Qanat Plugin] NUMREC ERROR　Message");
-			return map;
+
+         	return map;
 		}
-		
 		return map;
 
 	}
@@ -501,7 +511,13 @@ authtype = "custom";
 			if(data_a == null || data_a.isEmpty()){
 				System.out.println("[QanatPlugin] [ERROR] response data is null");
 		      	map.put(DatasetKey.RETURN_STATUS.getKey(), Constant.RET_STATUS_INVALID.getValue());
-		        return map;
+
+		      	System.out.println("ERROR_CODE -> [QanatPlugin] ReadError.");
+				map.put(DatasetKey.ERROR_CODE.getKey(), "[Qanat Plugin] ReadError.");
+				System.out.println("ERROR_MESSAGE -> [QanatPlugin] Read Exception.");
+				map.put(DatasetKey.ERROR_MESSAGE.getKey(), "[QanatPlugin] Read　Exception.");
+
+		      	return map;
 			}
 			
 			map.put(DatasetKey.DATA.getKey(), data_a, JSONArray.class);
@@ -510,10 +526,11 @@ authtype = "custom";
 		} catch (Exception e) {
 			System.out.println("[QanatPlugin] [ERROR] Read Error");
 			e.printStackTrace();
-			
-         	map.put(DatasetKey.RETURN_STATUS.getKey(), Constant.RET_STATUS_INVALID.getValue());
-         	map.put(DatasetKey.ERROR_CODE.getKey(), "[Qanat Plugin] ReadError.");
-         	map.put(DatasetKey.ERROR_MESSAGE.getKey(), "[Qanat Plugin] Read　Exception.");
+			map.put(DatasetKey.RETURN_STATUS.getKey(), Constant.RET_STATUS_INVALID.getValue());
+			System.out.println("ERROR_CODE -> [QanatPlugin] ReadError.");
+			map.put(DatasetKey.ERROR_CODE.getKey(), "[Qanat Plugin] ReadError.");
+			System.out.println("ERROR_MESSAGE -> [QanatPlugin] Read Exception.");
+			map.put(DatasetKey.ERROR_MESSAGE.getKey(), "[QanatPlugin] Read　Exception.");
          	return map;
 		}
 

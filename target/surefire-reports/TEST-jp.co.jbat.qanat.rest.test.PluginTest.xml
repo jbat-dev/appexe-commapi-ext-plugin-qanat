@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<testsuite failures="0" time="15.618" errors="0" skipped="0" tests="1" name="jp.co.jbat.qanat.rest.test.PluginTest">
+<testsuite failures="0" time="16.031" errors="0" skipped="0" tests="1" name="jp.co.jbat.qanat.rest.test.PluginTest">
   <properties>
     <property name="java.runtime.name" value="Java(TM) SE Runtime Environment"/>
     <property name="sun.boot.library.path" value="C:\Program Files\Java\jdk1.7.0_40\jre\bin"/>
@@ -26,9 +26,9 @@
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="user.variant" value=""/>
     <property name="os.name" value="Windows 7"/>
-    <property name="classworlds.conf" value="C:\workspace\Appexe\.metadata\.plugins\org.eclipse.m2e.launching\launches\m2conf5158460560740332573.tmp"/>
+    <property name="classworlds.conf" value="C:\workspace\Appexe\.metadata\.plugins\org.eclipse.m2e.launching\launches\m2conf1627962381655032735.tmp"/>
     <property name="sun.jnu.encoding" value="MS932"/>
-    <property name="java.library.path" value="C:\Program Files\Java\jdk1.7.0_40\bin;C:\Windows\Sun\Java\bin;C:\Windows\system32;C:\Windows;C:/Program Files/Java/jre1.8.0_25/bin/client;C:/Program Files/Java/jre1.8.0_25/bin;C:/Program Files/Java/jre1.8.0_25/lib/i386;C:\ProgramData\Oracle\Java\javapath;c:\program files\common files\microsoft shared\windows live;c:\program files\intel\icls client\;C:\Windows\system32;C:\Windows;C:\Windows\system32\wbem;C:\Windows\system32\windowspowershell\v1.0\;c:\program files\intel\intel(r) management engine components\dal;c:\program files\intel\intel(r) management engine components\ipt;c:\program files\intel\opencl sdk\2.0\bin\x86;c:\program files\common files\lenovo;c:\program files\windows live\shared;c:\swtools\readyapps;c:\program files\symantec\vip access client\;c:\program files\ibm\gsk8\lib;C:\PROGRA~1\IBM\SQLLIB\BIN;C:\PROGRA~1\IBM\SQLLIB\FUNCTION;C:\PROGRA~1\IBM\SQLLIB\SAMPLES\REPCL;C:\borland\bcc55\Bin;C:\Python27;C:\Program Files\doxygen\bin;C:\Program Files\Intel\OpenCL SDK\2.0\bin\x86;C:\Program Files\Intel\WiFi\bin\;C:\Program Files\Common Files\Intel\WirelessCommon\;C:\Program Files\WinSCP\;C:\ruby\Ruby193\bin;C:\maven\apache-maven-3.2.2\bin;C:\gradle-2.0\bin;C:\Program Files\Subversion\bin;C:\Program Files\Intel\WiFi\bin\;C:\Program Files\Common Files\Intel\WirelessCommon\;C:\ruby\Ruby193\bin;c:\Users\J34487\AppData\Local\atom\bin;C:\eclipses\4.4\eclipse;;."/>
+    <property name="java.library.path" value="C:\Program Files\Java\jdk1.7.0_40\bin;C:\Windows\Sun\Java\bin;C:\Windows\system32;C:\Windows;C:/Program Files/Java/jre1.8.0_45/bin/client;C:/Program Files/Java/jre1.8.0_45/bin;C:/Program Files/Java/jre1.8.0_45/lib/i386;C:\ProgramData\Oracle\Java\javapath;c:\program files\common files\microsoft shared\windows live;c:\program files\intel\icls client\;C:\Windows\system32;C:\Windows;C:\Windows\system32\wbem;C:\Windows\system32\windowspowershell\v1.0\;c:\program files\intel\intel(r) management engine components\dal;c:\program files\intel\intel(r) management engine components\ipt;c:\program files\intel\opencl sdk\2.0\bin\x86;c:\program files\common files\lenovo;c:\program files\windows live\shared;c:\swtools\readyapps;c:\program files\symantec\vip access client\;c:\program files\ibm\gsk8\lib;C:\PROGRA~1\IBM\SQLLIB\BIN;C:\PROGRA~1\IBM\SQLLIB\FUNCTION;C:\PROGRA~1\IBM\SQLLIB\SAMPLES\REPCL;C:\borland\bcc55\Bin;C:\Python27;C:\Program Files\doxygen\bin;C:\Program Files\Intel\OpenCL SDK\2.0\bin\x86;C:\Program Files\Intel\WiFi\bin\;C:\Program Files\Common Files\Intel\WirelessCommon\;C:\Program Files\WinSCP\;C:\ruby\Ruby193\bin;C:\maven\apache-maven-3.2.2\bin;C:\gradle-2.0\bin;C:\Program Files\Subversion\bin;C:\Program Files\Intel\WiFi\bin\;C:\Program Files\Common Files\Intel\WirelessCommon\;C:\ruby\Ruby193\bin;c:\Users\J34487\AppData\Local\atom\bin;C:\Users\J34487\AppData\Local\atom\bin;C:\eclipses\4.4\eclipse;;."/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
     <property name="java.class.version" value="51.0"/>
     <property name="sun.management.compiler" value="HotSpot Client Compiler"/>
@@ -61,5 +61,5 @@
     <property name="sun.desktop" value="windows"/>
     <property name="sun.cpu.isalist" value="pentium_pro+mmx pentium_pro pentium+mmx pentium i486 i386 i86"/>
   </properties>
-  <testcase time="15.618" classname="jp.co.jbat.qanat.rest.test.PluginTest" name="Test"/>
+  <testcase time="16.031" classname="jp.co.jbat.qanat.rest.test.PluginTest" name="Test"/>
 </testsuite>
