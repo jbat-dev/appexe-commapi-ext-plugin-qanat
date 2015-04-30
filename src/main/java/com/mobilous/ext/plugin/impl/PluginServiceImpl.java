@@ -91,7 +91,7 @@ authtype = "custom";
 		// update the plugin config filename should be same with plugin filename
 		// the, extension name shoud be ".xml" if the plugin filename will be changed
 		// update this
-		final String FILE_NAME = "appexe-commapi-ext-plugin-qanat_2015-03-26";
+		final String FILE_NAME = "appexe-commapi-ext-plugin-qanat";
 		pluginFile = FILE_NAME + ".jar";
 		pluginConfigFile = FILE_NAME + ".xml";
 
@@ -117,11 +117,9 @@ authtype = "custom";
 			/* To get xmlfile source without change code and jar file name. */
             // jar:file:/E:/NonBackupData/pleiades/glassfish/glassfish4/glassfish/domains/domain1/config/jbatdebug.jar!/com/mobilous/ext/plugin/impl/PluginServiceImpl.class
             String strRes = PluginServiceImpl.class.getResource("PluginServiceImpl.class").toString();
-            String jarFile = null;
             if (strRes != null) {
                 if (strRes.startsWith("jar:file")) {
                     String tmpJarfile = strRes.substring(0, strRes.indexOf("!"));
-                    jarFile = tmpJarfile.substring(9);
                     pluginFile = tmpJarfile.substring(tmpJarfile.lastIndexOf("/") + 1);
                     System.out.println("[Qanat PLUGIN] pluginFile=" + pluginFile);
                     String tmppluginConfigFile = pluginFile.substring(0, pluginFile.indexOf(".")) + ".xml";
