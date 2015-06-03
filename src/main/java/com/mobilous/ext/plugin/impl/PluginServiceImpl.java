@@ -75,10 +75,10 @@ public class PluginServiceImpl implements PluginService {
 
 // TODO For TEST
 //consumerKey = "54.65.87.122";
-consumerKey = "110.60.46.241:81";
-username = "cvadmin";
-password = "test";
-authtype = "custom";
+//consumerKey = "10.60.46.241:81"; maki PC
+//username = "cvadmin";
+//password = "test";
+//authtype = "custom";
 ////port = "80";
 //domain = "jbatsw.mobilous.com";
 //
