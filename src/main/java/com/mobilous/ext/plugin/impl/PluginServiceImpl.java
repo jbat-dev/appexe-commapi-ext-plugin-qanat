@@ -15,6 +15,7 @@ import javax.ws.rs.core.Response;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import jp.co.jbat.qanat.exception.QanatNetworkException;
 import jp.co.jbat.qanat.rest.util.QanatProperty;
 import jp.co.jbat.qanat.rest.entity.QanatErrorResponse;
 import jp.co.jbat.qanat.rest.entity.QanatRequest;
@@ -74,9 +75,9 @@ public class PluginServiceImpl implements PluginService {
 
 // TODO For TEST
 //consumerKey = "54.65.87.122";
-//consumerKey = "10.60.46.241";
-//username = "cvadmin";
-//password = "cvadmin";
+consumerKey = "110.60.46.241:81";
+username = "cvadmin";
+password = "test";
 authtype = "custom";
 ////port = "80";
 //domain = "jbatsw.mobilous.com";
@@ -425,12 +426,9 @@ authtype = "custom";
 			
 			if(data_a == null || data_a.isEmpty()){
 				System.out.println("[QanatPlugin] [ERROR] response data is null");
-
 				map.put(DatasetKey.RETURN_STATUS.getKey(), Constant.RET_STATUS_INVALID.getValue());
-
 				map.put(DatasetKey.ERROR_CODE.getKey(), "<Qanat Plugin> ReadError.");
-				map.put(DatasetKey.ERROR_MESSAGE.getKey(), "<QanatPlugin> Read　Exception.");
-				
+				map.put(DatasetKey.ERROR_MESSAGE.getKey(), "<QanatPlugin> Responce data is empty.");
 	         	return map;
 			}
 			
@@ -440,13 +438,26 @@ authtype = "custom";
 			map.put(DatasetKey.NUMBEROFRECORD.getKey(), recodenum);
         	map.put(DatasetKey.RETURN_STATUS.getKey(), Constant.RET_STATUS_VALID.getValue());
         	 
+		} catch (ProcessingException pe) {
+			System.out.println("[QanatPlugin] [ERROR] Can't connect to Qanat Server.");
+			pe.printStackTrace();
+         	map.put(DatasetKey.RETURN_STATUS.getKey(), Constant.RET_STATUS_INVALID.getValue());
+         	map.put(DatasetKey.ERROR_CODE.getKey(), "<Qanat Plugin> Can't connect to Qanat Server.");
+			map.put(DatasetKey.ERROR_MESSAGE.getKey(), "<Qanat Plugin> Please inquire administrator. : " + pe.getMessage());
+			return map;
+		}  catch (QanatNetworkException ne) {
+			System.out.println("[QanatPlugin] [ERROR] numrecord Network Error");
+			ne.printStackTrace();
+         	map.put(DatasetKey.RETURN_STATUS.getKey(), Constant.RET_STATUS_INVALID.getValue());
+         	map.put(DatasetKey.ERROR_CODE.getKey(), "<Qanat Plugin> Qanat Server Server Error occurred. : " + ne.getCode());
+			map.put(DatasetKey.ERROR_MESSAGE.getKey(), "<Qanat Plugin> Please inquire administrator. : " + ne.getMessage());
+			return map;
 		} catch (Exception e) {
 			System.out.println("[QanatPlugin] [ERROR] numrecord Error");
 			e.printStackTrace();
-			
          	map.put(DatasetKey.RETURN_STATUS.getKey(), Constant.RET_STATUS_INVALID.getValue());
-    		map.put(DatasetKey.ERROR_CODE.getKey(), "<Qanat Plugin> numrecord error occurred.");
-         	map.put(DatasetKey.ERROR_MESSAGE.getKey(), "<Qanat Plugin> " + e.toString());
+         	map.put(DatasetKey.ERROR_CODE.getKey(), "<Qanat Plugin> numrecord Unknown error occurred.");
+			map.put(DatasetKey.ERROR_MESSAGE.getKey(), "<Qanat Plugin> Please inquire administrator. : " + e.toString());
          	return map;
 		}
 		return map;
@@ -504,26 +515,35 @@ authtype = "custom";
 			JSONArray data_a = requestToQanat(QanatProperty.DATAVALUE, tablename);
 			if(data_a == null || data_a.isEmpty()){
 				System.out.println("[QanatPlugin] [ERROR] response data is null");
-		      	map.put(DatasetKey.RETURN_STATUS.getKey(), Constant.RET_STATUS_INVALID.getValue());
-
-		      	System.out.println("ERROR_CODE -> [QanatPlugin] ReadError.");
-				map.put(DatasetKey.ERROR_CODE.getKey(), "[Qanat Plugin] ReadError.");
-				System.out.println("ERROR_MESSAGE -> [QanatPlugin] Read Exception.");
-				map.put(DatasetKey.ERROR_MESSAGE.getKey(), "[QanatPlugin] Read　Exception.");
-
+				map.put(DatasetKey.RETURN_STATUS.getKey(), Constant.RET_STATUS_INVALID.getValue());
+				map.put(DatasetKey.ERROR_CODE.getKey(), "<Qanat Plugin> ReadError.");
+				map.put(DatasetKey.ERROR_MESSAGE.getKey(), "<QanatPlugin> Responce data is empty.");
 		      	return map;
 			}
 			
 			map.put(DatasetKey.DATA.getKey(), data_a, JSONArray.class);
          	map.put(DatasetKey.RETURN_STATUS.getKey(), Constant.RET_STATUS_VALID.getValue());
 
+		} catch (ProcessingException pe) {
+			System.out.println("[QanatPlugin] [ERROR] Can't connect to Qanat Server.");
+			pe.printStackTrace();
+         	map.put(DatasetKey.RETURN_STATUS.getKey(), Constant.RET_STATUS_INVALID.getValue());
+         	map.put(DatasetKey.ERROR_CODE.getKey(), "<Qanat Plugin> Can't connect to Qanat Server.");
+			map.put(DatasetKey.ERROR_MESSAGE.getKey(), "<Qanat Plugin> Please inquire administrator. : " + pe.getMessage());
+			return map;
+		} catch (QanatNetworkException ne) {
+			System.out.println("[QanatPlugin] [ERROR] Read Network Error");
+			ne.printStackTrace();
+         	map.put(DatasetKey.RETURN_STATUS.getKey(), Constant.RET_STATUS_INVALID.getValue());
+         	map.put(DatasetKey.ERROR_CODE.getKey(), "<Qanat Plugin> Qanat Server Server Error occurred. : " + ne.getCode());
+			map.put(DatasetKey.ERROR_MESSAGE.getKey(), "<Qanat Plugin> Please inquire administrator. : " + ne.getMessage());
+			return map;
 		} catch (Exception e) {
 			System.out.println("[QanatPlugin] [ERROR] Read Error");
 			e.printStackTrace();
-
 			map.put(DatasetKey.RETURN_STATUS.getKey(), Constant.RET_STATUS_INVALID.getValue());
-    		map.put(DatasetKey.ERROR_CODE.getKey(), "<Qanat Plugin> read error occurred.");
-         	map.put(DatasetKey.ERROR_MESSAGE.getKey(), "<Qanat Plugin> " + e.toString());
+			map.put(DatasetKey.ERROR_CODE.getKey(), "<Qanat Plugin> read Unknown error occurred.");
+			map.put(DatasetKey.ERROR_MESSAGE.getKey(), "<Qanat Plugin> " + e.toString());
          	return map;
 		}
 
@@ -578,7 +598,7 @@ authtype = "custom";
 	 * @throws Exception
 	 */
 	private JSONArray requestToQanat(final String serviceURL,
-			final String tablename) throws ParseException, JsonProcessingException, Exception {
+			final String tablename) throws ParseException, JsonProcessingException, QanatNetworkException, Exception {
 
 		String qanatDomain = "http://" + consumerKey + "/qanat/rest";
 
@@ -606,14 +626,9 @@ System.out.println("requestData_end");
 		//TODO erase upper code
 		
 		// Make client & target
-		// org.glassfish version
 		org.glassfish.jersey.client.JerseyClient client =  org.glassfish.jersey.client.JerseyClientBuilder.createClient();
 		org.glassfish.jersey.client.JerseyWebTarget target = client.target(qanatDomain).path(serviceURL);
 
-//		Client client =  ClientBuilder.newClient();
-//		WebTarget target = client.target(qanatDomain).path(serviceURL);
-		
-		
 		// Fetch Data
 		Response response = null;
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
@@ -630,7 +645,7 @@ System.out.println("requestData_end");
 			System.out.println("[QanatPlugin] [ERROR] Request Error Occurred");
 			throw e;
 		} catch (Exception e){
-			System.out.println("[QanatPlugin] [ERROR] Anknown Error Occurred");
+			System.out.println("[QanatPlugin] [ERROR] Unknown Error Occurred");
 			throw e;
 		} finally {
 			System.out.println("[QanatPlugin] [Time] Request End     : " + sdf.format(new Date()));
@@ -650,11 +665,13 @@ System.out.println("requestData_end");
 			//TODO 
 
 			return json_a;
+			// Use Exception fot invalid status
 		} else if (response.getStatus() == 404) {
-			System.out.println("[QanatPlugin] [ERROR] Qanat Server NOT found.");
-			return null;
+			System.out.println("[QanatPlugin] [ERROR] HTTP 404 Error. Qanat Server was NOT found.");
+			QanatNetworkException ne = new QanatNetworkException(404,"Qanat Server NOT found.");
+			throw ne;
 		} else if (response.getStatus() == 500){
-			System.out.println("[QanatPlugin] [ERROR] Qanat Server Internal Error Occurred");
+			System.out.println("[QanatPlugin] [ERROR] HTTP 500 Error. Qanat Server Internal Error Occurred");
 			QanatErrorResponse error = new QanatErrorResponse();
 			error = response.readEntity(QanatErrorResponse.class);
 			jsonstr = mapper.writeValueAsString(error.getError());
@@ -662,13 +679,16 @@ System.out.println("requestData_end");
 			System.out.println("Qanat Message : " + error.getError().getMessage());
 			System.out.println("Qanat Trace   : " + error.getError().getTrace());
 			System.out.println("500seError_end");
-			return null;
+			QanatNetworkException ne = new QanatNetworkException(response.getStatus(),"Qanat Server Internal ErrorOccurred.");
+			throw ne;
 		} else if (response.getStatus() == 503){
-			System.out.println("[QanatPlugin] [ERROR] Qanat Server Service Unavailable");
-			return null;
+			System.out.println("[QanatPlugin] [ERROR] HTTP 503 Error. Qanat Server Service Unavailable");
+			QanatNetworkException ne = new QanatNetworkException(response.getStatus(),"Qanat Server Service was Unavailable.");
+			throw ne;
 		} else {
 			System.out.println("[QanatPlugin] [ERROR] Qanat Server Responsed : " + response.getStatus());
-			return null;
+			QanatNetworkException ne = new QanatNetworkException(999,"Qanat Server Unknown Error Occurred.");
+			throw ne;
 		}
 
 	}

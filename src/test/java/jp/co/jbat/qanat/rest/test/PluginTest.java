@@ -105,7 +105,7 @@ public class PluginTest {
 			dataset.put(DatasetKey.WHERE.getKey(), null);
 			System.out.println("Try : numrecord");
 			getRecordNum = service.numrecord(dataset);
-			if (getRecordNum.get("auth_status", String.class).equals("invalid")) {
+			if (getRecordNum.get(DatasetKey.RETURN_STATUS.getKey(), String.class).equals("invalid")) {
 				System.out.println("getRecordNum : invalid");
 			} else {
 				System.out.println("Done : numrecord");
@@ -117,7 +117,7 @@ public class PluginTest {
 			dataset.put(DatasetKey.WHERE.getKey(), null);
 			System.out.println("Try : read");
 			getRead = service.read(dataset);
-			if (getRead.get("auth_status", String.class).equals("invalid")) {
+			if (getRead.get(DatasetKey.RETURN_STATUS.getKey(), String.class).equals("invalid")) {
 				System.out.println("getRead : invalid");
 			} else {
 				System.out.println("Done : read");
